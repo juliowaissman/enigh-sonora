@@ -12,6 +12,7 @@ lo dice con instrucciones concretas en lugar de fallar.
 from __future__ import annotations
 
 import json
+import logging
 import sys
 from pathlib import Path
 
@@ -19,6 +20,8 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+
+log = logging.getLogger("enigh.tablero")
 
 # El paquete ``enigh`` vive junto a este archivo, así que la raíz del proyecto
 # debe estar en el path de importación. Sin esto, el tablero solo funciona si se
@@ -43,6 +46,24 @@ st.set_page_config(
 )
 
 CFG = config.cargar_configuracion()
+
+# --- Identidad del proyecto y autoría ---------------------------------------
+# Estos textos se definen una sola vez para que las pruebas puedan afirmarlos y
+# para que el crédito no se desincronice entre las vistas.
+
+PROGRAMA_MCD = "Maestría en Ciencia de Datos"
+SITIO_MCD = "https://mcd.unison.mx/"
+
+CREDITO = (
+    "Desarrollado por Julio Waissman (julio.waissman@unison.mx) "
+    "con DeepSeek Harness y Streamlit."
+)
+
+# Emblema de la MCD. Se versiona en ``assets/`` (19 KB) en lugar de descargarse
+# en el arranque: así el tablero sigue funcionando sin red y sin depender de que
+# el sitio de la MCD mantenga el archivo disponible.
+RUTA_LOGO_MCD = _RAIZ_PROYECTO / "assets" / "logo_mcd.png"
+LOGO_MCD_DISPONIBLE = RUTA_LOGO_MCD.is_file()
 
 ETIQUETAS_METRICA = {
     "ing_pc": "Ingreso corriente per cápita",
@@ -202,12 +223,55 @@ def aplicar_deflactor(hogares: pd.DataFrame, anio: int, metrica: str, expresion:
 
 
 # --------------------------------------------------------------------------
+# Branding (Maestría en Ciencia de Datos)
+# --------------------------------------------------------------------------
+
+
+def mostrar_logo_mcd(destino, *, ancho: int) -> bool:
+    """Muestra el emblema de la MCD si está disponible.
+
+    Devuelve ``True`` si dibujó la imagen. Nunca lanza: un recurso ausente no debe
+    tumbar el tablero completo, porque ``st.image`` levanta ``RuntimeError``
+    cuando el archivo no existe y el branding es lo menos importante de la página.
+    """
+    if not LOGO_MCD_DISPONIBLE:
+        log.warning(
+            "No se encontró el emblema en %s; se muestra solo el texto.",
+            RUTA_LOGO_MCD,
+        )
+        return False
+    try:
+        destino.image(str(RUTA_LOGO_MCD), width=ancho)
+        return True
+    except (RuntimeError, OSError) as exc:  # pragma: no cover - defensivo
+        log.warning("No se pudo mostrar el emblema de la MCD: %s", exc)
+        return False
+
+
+def creditos(*, compacto: bool = False) -> None:
+    """Identidad del programa y autoría.
+
+    ``compacto`` usa tipografía pequeña, para la barra lateral; en la vista de
+    metodología se muestra en tamaño normal porque ahí sí es contenido.
+    """
+    etiqueta = st.caption if compacto else st.markdown
+    etiqueta(f"**{PROGRAMA_MCD}** · [UNISON]({SITIO_MCD})")
+    etiqueta(CREDITO)
+
+
+# --------------------------------------------------------------------------
 # Barra lateral
 # --------------------------------------------------------------------------
 
 
 def barra_lateral(anios: list[int]) -> dict:
     """Controles globales del tablero."""
+    # Identidad del programa: emblema y texto siempre visibles, para que el
+    # contexto académico del tablero quede claro en cualquier vista.
+    mostrar_logo_mcd(st.sidebar, ancho=110)
+    st.sidebar.caption(f"**{PROGRAMA_MCD}** · [UNISON]({SITIO_MCD})")
+    st.sidebar.divider()
+
     st.sidebar.title("ENIGH · Sonora")
     st.sidebar.caption(
         "Encuesta Nacional de Ingresos y Gastos de los Hogares, INEGI."
@@ -276,6 +340,10 @@ def barra_lateral(anios: list[int]) -> dict:
         f"Años procesados: {', '.join(str(a) for a in anios)}. "
         "Los montos de la ENIGH son trimestrales."
     )
+
+    # Autoría, presente en todas las vistas.
+    st.sidebar.divider()
+    st.sidebar.caption(CREDITO)
 
     return {
         "pagina": pagina, "anio": anio, "metrica": metrica,
@@ -952,6 +1020,36 @@ gráficas.
                 st.json(entrada)
         st.caption(f"Python: {manifiesto.get('python', 's/d')}")
         st.caption(f"Plataforma: {manifiesto.get('plataforma', 's/d')}")
+
+    st.divider()
+    _seccion_creditos()
+
+
+def _seccion_creditos() -> None:
+    """Identidad del programa y autoría, en tamaño legible y texto copiable."""
+    st.subheader("Sobre este tablero")
+
+    izquierda, derecha = st.columns([1, 4], gap="large")
+    with izquierda:
+        mostrar_logo_mcd(st, ancho=140)
+    with derecha:
+        st.markdown(
+            f"""
+**{PROGRAMA_MCD}** · Universidad de Sonora
+
+{CREDITO}
+
+Este tablero forma parte del trabajo de la [{PROGRAMA_MCD}]({SITIO_MCD}) y se
+apoya en software abierto: [Streamlit](https://streamlit.io/) para la interfaz,
+[Plotly](https://plotly.com/python/) para las gráficas, [pandas](https://pandas.pydata.org/)
+y [NumPy](https://numpy.org/) para el cálculo.
+"""
+        )
+        st.caption(
+            "Los microdatos son del INEGI. El emblema identifica al programa "
+            "académico y no implica que el INEGI ni la Universidad de Sonora "
+            "respalden las cifras aquí presentadas."
+        )
 
 
 # --------------------------------------------------------------------------

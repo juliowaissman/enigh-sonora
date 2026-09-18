@@ -84,6 +84,26 @@ def test_el_tablero_tiene_los_controles_esperados(aplicacion):
     # Vista, año, métrica, expresión y definición de deciles.
     assert len(aplicacion.sidebar.radio) == 4
     assert len(aplicacion.sidebar.selectbox) == 1
+    # Añadir el emblema al sidebar no debe alterar los controles.
+    assert len(aplicacion.sidebar.get("imgs")) >= 1
+
+
+def test_el_tablero_muestra_la_identidad_de_la_mcd(aplicacion):
+    """El emblema, el programa y la autoría deben verse en la barra lateral.
+
+    Se comprueba sobre la instancia que ya está creada para no añadir otra
+    ejecución completa del tablero (cada una tarda alrededor de un segundo).
+    """
+    import app as tablero
+
+    captions = " ".join(c.value for c in aplicacion.sidebar.caption)
+    markdown = " ".join(m.value for m in aplicacion.sidebar.markdown)
+    texto = f"{captions} {markdown}"
+
+    assert tablero.PROGRAMA_MCD in texto, "falta el nombre del programa en el sidebar"
+    assert "Julio Waissman" in texto, "falta la autoría en el sidebar"
+    assert "julio.waissman@unison.mx" in texto, "falta el correo en el sidebar"
+    assert "DeepSeek Harness" in texto, "falta la mención de DeepSeek Harness"
 
 
 @pytest.mark.parametrize("pagina", PAGINAS)
@@ -98,6 +118,31 @@ def test_cada_vista_se_ejecuta_sin_excepciones(pagina):
     assert not [e.value for e in at.error], (
         f"la vista {pagina!r} mostró errores: {[e.value for e in at.error]}"
     )
+
+
+def test_la_vista_de_metodologia_incluye_la_seccion_de_creditos():
+    """La atribución debe estar también en el cuerpo, con el emblema más grande."""
+    import app as tablero
+
+    at = _aplicacion_nueva()
+    if at.exception:
+        pytest.skip(f"el tablero no arrancó: {at.exception}")
+
+    # La vista se llama "Metodología y calidad" en la barra lateral.
+    at.sidebar.radio[0].set_value("Metodología y calidad").run()
+    assert not at.exception
+
+    subsecciones = [s.value for s in at.subheader]
+    assert "Sobre este tablero" in subsecciones, (
+        f"falta la sección de créditos; subsecciones: {subsecciones}"
+    )
+
+    cuerpo = " ".join(m.value for m in at.markdown)
+    assert tablero.PROGRAMA_MCD in cuerpo, "falta el programa en la sección de créditos"
+    assert tablero.CREDITO in cuerpo, "falta la leyenda de autoría completa"
+
+    # El emblema se muestra en el sidebar y, además, en la sección de créditos.
+    assert len(at.get("imgs")) >= 2, "falta el emblema en la sección de créditos"
 
 
 @pytest.mark.parametrize(

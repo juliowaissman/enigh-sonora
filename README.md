@@ -1,5 +1,15 @@
 # ENIGH · Ingreso de las familias en Sonora por decil
 
+<p align="center">
+  <img src="assets/logo_mcd.png" alt="Maestría en Ciencia de Datos, Universidad de Sonora" width="120">
+</p>
+
+<p align="center">
+  <strong>Maestría en Ciencia de Datos</strong> · <a href="https://mcd.unison.mx/">Universidad de Sonora</a>
+  <br>
+  Desarrollado por Julio Waissman (julio.waissman@unison.mx) con DeepSeek Harness y Streamlit.
+</p>
+
 Aplicación de análisis de datos que descarga la **Encuesta Nacional de Ingresos y
 Gastos de los Hogares (ENIGH)** del INEGI, la procesa y sirve un tablero
 interactivo en Streamlit sobre cómo está el ingreso de los hogares en **Sonora**,
@@ -149,10 +159,11 @@ enigh/              paquete de análisis (sin dependencia de Streamlit)
   validacion.py     comprobaciones contra cifras de control
   pipeline.py       orquestador con CLI
 app.py              tablero Streamlit
+assets/             emblema de la Maestría en Ciencia de Datos
 config/             fuentes.yaml, deflactores.csv, validacion.csv
 data/               NO versionado: se genera con `make data` (solo .gitkeep)
 docs/               evidencia de la verificación del INPC (boletines y serie)
-tests/              197 pruebas (unidad, integración y humo del tablero)
+tests/              208 pruebas (unidad, integración, identidad y humo del tablero)
 ```
 
 El catálogo de indicadores de bienestar se declara en `enigh/bienestar.py` (una
@@ -253,3 +264,18 @@ construyen con Plotly sobre GeoJSON crudo en memoria.
 
 El intérprete de Python del proyecto vive en `.tools/` (no versionado) porque el
 entorno de desarrollo no permite escribir en `/opt/homebrew` ni en `~/.local`.
+
+---
+
+## Autoría y atribución
+
+**Maestría en Ciencia de Datos** · [Universidad de Sonora](https://mcd.unison.mx/)
+
+Desarrollado por **Julio Waissman** (julio.waissman@unison.mx) con **DeepSeek
+Harness** y **Streamlit**.
+
+El emblema de `assets/` identifica al programa académico al que pertenece este
+trabajo. Los microdatos son del **INEGI** y la cartografía del **Marco
+Geoestadístico del INEGI**; ni el INEGI ni la Universidad de Sonora respaldan las
+cifras aquí presentadas. Las decisiones metodológicas —incluidos los supuestos
+sobre la escala de equivalencia y la deflactación— son responsabilidad del autor.
