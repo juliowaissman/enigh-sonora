@@ -1,0 +1,9 @@
+anio,ambito,valor_esperado,tolerancia_relativa,fuente,nota
+2024,nacional_hogares_expandidos,38830230,0.03,"ENIGH 2024, factor de expansión (este proyecto)","Control interno: suma de factor sobre los 91,414 hogares de la muestra."
+2024,sonora_hogares_expandidos,951076,0.05,"ENIGH 2024, factor de expansión (este proyecto)","Control interno: suma de factor sobre los 2,642 hogares de Sonora en la muestra."
+2024,entidades_distintas,32,0.0,"Catálogo ubica_geo del propio ZIP de INEGI","Todas las entidades deben tener al menos un hogar en muestra."
+2024,deciles_con_hogares,10,0.0,"Cálculo propio","Los diez deciles nacionales deben estar poblados."
+2024,participacion_total_deciles,100.0,0.001,"Cálculo propio","La suma de las participaciones decílicas debe dar 100 %."
+2024,identidad_ing_cor_discrepancias,0,0.0,"Verificación de la identidad contable","ing_cor = ingtrab + rentas + transfer + estim_alqu + otros_ing, tolerancia 0.02 pesos."
+2022,nacional_hogares_expandidos,37000000,0.06,"ENIGH 2022","Control de orden de magnitud."
+2020,nacional_hogares_expandidos,35000000,0.08,"ENIGH 2020","Control de orden de magnitud; año atípico por COVID-19."

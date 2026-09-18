@@ -1,0 +1,130 @@
+# Fuentes oficiales de microdatos ENIGH (INEGI).
+#
+# IMPORTANTE: el nombre del archivo ZIP NO sigue un patrón consistente entre
+# años. Verificado por inspección HTTP contra inegi.org.mx:
+#   2020 -> conjunto_de_datos_enigh_ns_2020_csv.zip
+#   2022 -> conjunto_de_datos_enigh_ns_2022_csv.zip
+#   2024 -> conjunto_de_datos_enigh2024_ns_csv.zip
+#   2018 -> conjunto_de_datos_enigh_2018_ns_csv.zip   (otro patrón más)
+# Por eso las URLs van como tabla explícita y no construidas con f-string.
+#
+# Trampa conocida de INEGI: una ruta inexistente responde HTTP 200 con un HTML
+# de ~2263 bytes y Content-Type text/html. La descarga NO debe confiar en el
+# código HTTP: valida Content-Type, firma ZIP (PK\x03\x04) y tamaño mínimo.
+
+base_url: "https://www.inegi.org.mx/contenidos/programas/enigh"
+
+# Tabla de tablas de microdatos dentro de cada ZIP. El sufijo del directorio
+# también cambia entre años (enigh2024_ns vs enigh_2020_ns vs enigh2022_ns).
+tablas:
+  concentradohogar:
+    descripcion: "Principales variables por hogar: ingresos, gastos y composición"
+    obligatoria: true
+  poblacion:
+    descripcion: "Características sociodemográficas de los integrantes del hogar"
+    obligatoria: false
+  hogares:
+    descripcion: "Características del hogar: alimentación, bienes, conectividad"
+    obligatoria: false
+  viviendas:
+    descripcion: "Características de las viviendas: servicios básicos, materiales"
+    obligatoria: false
+
+# Tablas deliberadamente NO extraídas por costo/beneficio:
+#   gastoshogar (579 MB descomprimidos), gastospersona, gastotarjetas,
+#   agro*, noagro*, erogaciones, trabajos. No se usan en el tablero.
+tablas_excluidas:
+  - gastoshogar
+  - gastospersona
+  - gastotarjetas
+  - agro
+  - agroconsumo
+  - agrogasto
+  - agroproductos
+  - noagro
+  - noagroimportes
+  - erogaciones
+  - trabajos
+  - ingresos
+  - ingresos_jcf
+
+anios:
+  2018:
+    habilitado: false  # fuera de la serie acordada; URL verificada y lista para habilitar
+    url: "https://www.inegi.org.mx/contenidos/programas/enigh/nc/2018/datosabiertos/conjunto_de_datos_enigh_2018_ns_csv.zip"
+    bytes_esperados: 43339807
+    etiqueta: "2018 (nueva serie)"
+    nota: "Levantamiento tradicional. Habilítelo para extender la serie hacia atrás."
+  2020:
+    habilitado: true
+    url: "https://www.inegi.org.mx/contenidos/programas/enigh/nc/2020/datosabiertos/conjunto_de_datos_enigh_ns_2020_csv.zip"
+    bytes_esperados: 93711908
+    etiqueta: "2020"
+    nota: "Levantamiento atípico por COVID-19: muestra reducida y sin ENIGH de hogares completa. Interpretar la serie 2020 con cautela."
+  2022:
+    habilitado: true
+    url: "https://www.inegi.org.mx/contenidos/programas/enigh/nc/2022/datosabiertos/conjunto_de_datos_enigh_ns_2022_csv.zip"
+    bytes_esperados: 90030937
+    etiqueta: "2022"
+    nota: ""
+  2024:
+    habilitado: true
+    url: "https://www.inegi.org.mx/contenidos/programas/enigh/nc/2024/datosabiertos/conjunto_de_datos_enigh2024_ns_csv.zip"
+    bytes_esperados: 103139139
+    etiqueta: "2024"
+    nota: "Publicación 2025. Levantamiento completo de nueva serie."
+
+# Anio de referencia al que se deflactan los valores monetarios.
+anio_base_deflactor: 2024
+
+# Umbrales metodológicos usados por el tablero.
+umbrales:
+  # Coeficiente de variación a partir del cual una estimación se marca como
+  # poco fiable y se dibuja atenuada / se suprime.
+  cv_no_fiable: 0.25
+  # Hogares mínimos en muestra para publicar un promedio municipal.
+  hogares_min_municipio: 30
+  # UPM mínimas para intentar bootstrap de una celda.
+  upm_min_bootstrap: 20
+  # Réplicas de bootstrap.
+  replicas_bootstrap: 500
+  semilla_bootstrap: 20240101
+
+# Nombres de columna que deben existir en concentradohogar. El validador falla
+# con el nombre exacto de la columna faltante.
+columnas_requeridas_concentradohogar:
+  - folioviv
+  - foliohog
+  - ubica_geo
+  - factor
+  - tot_integ
+  - ing_cor
+  - ingtrab
+  - gasto_mon
+  - alimentos
+  - sexo_jefe
+  - edad_jefe
+  - educa_jefe
+  - est_socio
+  - clase_hog
+  - hombres
+  - mujeres
+  - menores
+  - p12_64
+  - p65mas
+  - ocupados
+  - percep_ing
+
+# Bloque de ingresos usado para verificar la identidad contable del ingreso
+# corriente. La validación permite una tolerancia por redondeo.
+# Verificado empíricamente sobre los 91,414 hogares de ENIGH 2024:
+# ing_cor = ingtrab + rentas + transfer + estim_alqu + otros_ing, con
+# discrepancia máxima de 0.0000. OJO: estim_alqu (valor imputado del alquiler de
+# la vivienda propia) es indispensable; omitirlo produce ~86 % de falsos
+# positivos en esta validación.
+componentes_ing_cor:
+  - ingtrab
+  - rentas
+  - transfer
+  - estim_alqu
+  - otros_ing

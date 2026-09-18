@@ -1,0 +1,44 @@
+# Entorno local de Python. Vive dentro del proyecto porque el entorno de
+# desarrollo no permite escribir en /opt/homebrew ni en ~/.local.
+.tools/
+
+# Entorno virtual
+.venv/
+venv/
+
+# ---------------------------------------------------------------------------
+# DATOS: nunca se versionan.
+#
+# La ENIGH completa ocupa ~911 MB en disco y es enteramente reproducible desde
+# fuentes públicas con el pipeline incluido (`make data`):
+#
+#   data/raw       ~276 MB  ZIP originales de INEGI
+#   data/interim   ~575 MB  CSV extraídos de esos ZIP
+#   data/processed  ~60 MB  Parquet curado y agregados
+#
+# Volver a generar todo tarda entre 5 y 14 minutos según se usen o no los
+# intervalos de confianza. Mezclar esos datos en git haría el repositorio
+# inmanejable y, además, duplicaría en cada clon algo que ya está en línea.
+#
+# Se ignora el árbol completo (`data/**`) y se conserva un único `.gitkeep` en la
+# raíz: git no versiona directorios vacíos, así que sin él `data/` no aparecería
+# en un clon. Los subdirectorios (raw, interim, processed, muestra) los crea el
+# pipeline al arrancar (`config.asegurar_directorios`), así que no hace falta
+# versionarlos; ignorar el árbol entero también evita depender de negaciones
+# frágiles de gitignore.
+# ---------------------------------------------------------------------------
+data/**
+!data/.gitkeep
+
+# Red de seguridad: un Parquet suelto fuera de data/ tampoco debe entrar.
+*.parquet
+
+# Caché
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.streamlit/secrets.toml
+
+# macOS
+.DS_Store

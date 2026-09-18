@@ -1,0 +1,20 @@
+# Dependencias del proyecto ENIGH Sonora.
+# Instalación:  make venv   (o  .venv/bin/python -m pip install -r requirements.txt)
+#
+# Notas de diseño:
+#  - NO se usa geopandas ni shapely: requieren compilación frágil y los mapas se
+#    construyen con plotly sobre GeoJSON crudo en memoria.
+#  - pyarrow habilita Parquet (formato de los datos procesados versionados).
+#  - Versiones fijadas a la baja para que el proyecto sea reproducible.
+
+pandas==2.2.3
+numpy==2.1.3
+pyarrow==18.1.0
+streamlit==1.41.1
+plotly==5.24.1
+requests==2.32.3
+PyYAML==6.0.2
+
+# Desarrollo / pruebas
+pytest==8.3.4
+ruff==0.8.4

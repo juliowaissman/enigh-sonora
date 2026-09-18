@@ -1,0 +1,22 @@
+# Configuración del tablero Streamlit.
+#
+# El análisis se sirve en español; los montos y las etiquetas siguen la
+# convención de INEGI (pesos corrientes trimestrales).
+
+[theme]
+base = "light"
+primaryColor = "#C1440E"          # terracota: el color de Sonora en las gráficas
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F2EE"
+textColor = "#1F2933"
+font = "sans serif"
+
+[server]
+# El tablero lee Parquet locales de data/processed; no necesita red.
+headless = true
+# No se desactiva CORS a propósito: Streamlit lo considera incompatible con la
+# protección CSRF (enableXsrfProtection) y al desactivarlo lo sobrescribe con un
+# aviso de arranque. En un tablero local, el valor por omisión es el correcto.
+
+[browser]
+gatherUsageStats = false
